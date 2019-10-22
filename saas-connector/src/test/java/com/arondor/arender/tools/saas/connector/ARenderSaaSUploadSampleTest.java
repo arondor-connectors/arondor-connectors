@@ -29,7 +29,7 @@ public class ARenderSaaSUploadSampleTest
         String documentTitle = "AccessiWeb_bonnes_pratiques_pdf_accessibles_5mars2009.doc";
         FileInputStream fileInputStream = new FileInputStream("src/test/resources/" + documentTitle);
         String id = "IDOfYourDocument";
-        aRenderSaaSUploadSample.setApiKey(myApiKey);
+        aRenderSaaSUploadSample.setaRenderHMIApiKey(myApiKey);
         String aRenderUUID = aRenderSaaSUploadSample.getARenderUUID(fileInputStream, id, documentTitle);
         String checkedUUIDExisted = aRenderSaaSUploadSample.checkIfUUIDExists(id);
         Assert.assertNotNull(checkedUUIDExisted);

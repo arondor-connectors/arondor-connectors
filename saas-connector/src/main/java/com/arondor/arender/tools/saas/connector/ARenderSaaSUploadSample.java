@@ -1,6 +1,5 @@
 package com.arondor.arender.tools.saas.connector;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -11,7 +10,6 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -21,32 +19,33 @@ import java.net.URLEncoder;
  */
 public class ARenderSaaSUploadSample
 {
-    private static final String MODEL_PARAM_UUID = "UUID";
+    public static final String API_KEY_PARAM_VALUE = "api-key";
 
-    private static final String DEFAULT_ARENDER_ID = "b64_I2RlZmF1bHQ=";
+    public static final String UUID_PARAM_VALUE = "uuid";
 
     private String arenderUrl;
 
-    private String apiKey;
+    private String aRenderHMIApiKey;
 
     public ARenderSaaSUploadSample()
     {
         arenderUrl = "https://saas.arender.io/";
-        apiKey = "baseApiKey";
+        aRenderHMIApiKey = "baseApiKey";
     }
 
     public String getARenderUUID(InputStream stream, String refId, String documentTitle) throws IOException
     {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpPost uploadFile = new HttpPost(
-                (new StringBuilder()).append(arenderUrl).append("arendergwt/uploadServlet?api-key=").append(apiKey)
-                        .append("&uuid=").append(URLEncoder.encode(refId, "UTF-8")).toString());
+                (new StringBuilder()).append(arenderUrl).append("arendergwt/uploadServlet?" + API_KEY_PARAM_VALUE + "=").append(
+                        aRenderHMIApiKey)
+                        .append("&" + UUID_PARAM_VALUE + "=").append(URLEncoder.encode(refId, "UTF-8")).toString());
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.addBinaryBody("file", stream, ContentType.APPLICATION_OCTET_STREAM, documentTitle);
         HttpEntity multipart = builder.build();
         uploadFile.setEntity(multipart);
         CloseableHttpResponse response = httpClient.execute(uploadFile);
-        return (new String(read(response.getEntity().getContent()))).replace("|", "").trim();
+        return (new String(ARenderSaaSUtils.read(response.getEntity().getContent()))).replace("|", "").trim();
     }
 
     /**
@@ -74,44 +73,19 @@ public class ARenderSaaSUploadSample
     private String getCall(String uuid, String servletName) throws IOException
     {
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpGet get = new HttpGet((new StringBuilder()).append(arenderUrl).append(servletName).append("?api-key=")
-                .append(apiKey).append("&uuid=").append(URLEncoder.encode(uuid, "UTF-8")).toString());
+        HttpGet get = new HttpGet((new StringBuilder()).append(arenderUrl).append(servletName).append(
+                "?" + API_KEY_PARAM_VALUE + "=")
+                .append(aRenderHMIApiKey).append("&" + UUID_PARAM_VALUE + "=").append(URLEncoder.encode(uuid, "UTF-8")).toString());
         CloseableHttpResponse response = httpClient.execute(get);
         int statusCode = response.getStatusLine().getStatusCode();
         if (statusCode == HttpStatus.SC_OK)
         {
             // the document already exists
-            return (new String(read(response.getEntity().getContent()))).replace("|", "").trim();
+            return (new String(ARenderSaaSUtils.read(response.getEntity().getContent()))).replace("|", "").trim();
         }
         else
         {
             return null;
-        }
-    }
-
-    private byte[] read(InputStream is) throws IOException
-    {
-        try
-        {
-            return IOUtils.toByteArray(is);
-        }
-        finally
-        {
-            closeQuietly(is);
-        }
-    }
-
-    protected void closeQuietly(Closeable closeable)
-    {
-        try
-        {
-            if (closeable != null)
-            {
-                closeable.close();
-            }
-        }
-        catch (IOException ioexception)
-        {
         }
     }
 
@@ -125,13 +99,13 @@ public class ARenderSaaSUploadSample
         this.arenderUrl = arenderUrl;
     }
 
-    public String getApiKey()
+    public String getaRenderHMIApiKey()
     {
-        return apiKey;
+        return aRenderHMIApiKey;
     }
 
-    public void setApiKey(String apiKey)
+    public void setaRenderHMIApiKey(String aRenderHMIApiKey)
     {
-        this.apiKey = apiKey;
+        this.aRenderHMIApiKey = aRenderHMIApiKey;
     }
 }
